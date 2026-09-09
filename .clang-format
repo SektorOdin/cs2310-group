@@ -1,0 +1,20 @@
+BasedOnStyle: LLVM
+
+# --- Your Specific Requirements ---
+IndentWidth: 4         # 4 spaces for tabs
+TabWidth: 4
+UseTab: Never          # Use spaces, not real tabs
+ColumnLimit: 100       # Wrap lines at 100 chars
+
+# --- Java-like Formatting ---
+
+# Force braces for if/loops (avoid single-line statements)
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Make signatures clearer (bracket on new line for long functions)
+AlwaysBreakAfterReturnType: All
+
+# Spacing around operators
+SpaceBeforeParens: Always
+SpaceAfterCStyleCast: false
