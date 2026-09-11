@@ -1,20 +1,35 @@
 BasedOnStyle: LLVM
 
-# --- Your Specific Requirements ---
-IndentWidth: 4         # 4 spaces for tabs
+# --- Indentation ---
+IndentWidth: 4
 TabWidth: 4
-UseTab: Never          # Use spaces, not real tabs
-ColumnLimit: 100       # Wrap lines at 100 chars
+UseTab: Never
 
-# --- Java-like Formatting ---
+# Specific indents kept at 4 (matches IndentWidth)
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
 
-# Force braces for if/loops (avoid single-line statements)
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+# --- Line Length ---
+ColumnLimit: 100
 
-# Make signatures clearer (bracket on new line for long functions)
-AlwaysBreakAfterReturnType: All
+# --- Function Style ---
+BreakAfterReturnType: Automatic
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
 
-# Spacing around operators
-SpaceBeforeParens: Always
-SpaceAfterCStyleCast: false
+# --- Layout & Alignment ---
+BreakBeforeBraces: Attach
+PointerAlignment: Right
+SpaceBeforeRangeBasedForLoopColon: true
+AlignConsecutiveDeclarations:
+  Enabled: false
+
+# --- Includes ---
+IncludeBlocks: Preserve
+SortIncludes:
+  Enabled: true
+
+# --- File Structure ---
+InsertNewlineAtEOF: true
+Standard: Auto
