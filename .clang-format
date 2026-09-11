@@ -27,8 +27,7 @@ AlignConsecutiveDeclarations:
 
 # --- Includes ---
 IncludeBlocks: Preserve
-SortIncludes:
-  Enabled: true
+SortIncludes: true
 
 # --- File Structure ---
 InsertNewlineAtEOF: true
