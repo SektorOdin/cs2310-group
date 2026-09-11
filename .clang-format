@@ -13,7 +13,7 @@ ContinuationIndentWidth: 4
 ColumnLimit: 100
 
 # --- Function Style ---
-BreakAfterReturnType: Automatic
+AlwaysBreakAfterReturnType: None
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
@@ -31,4 +31,3 @@ SortIncludes: true
 
 # --- File Structure ---
 InsertNewlineAtEOF: true
-Standard: Auto
