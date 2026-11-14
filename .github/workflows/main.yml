@@ -9,9 +9,15 @@ on:
 jobs:
   format:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      # ... your clang-format download step ...
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-18
+          
       - name: Check code formatting
         run: |
           clang-format-18 --dry-run --Werror \
@@ -24,12 +30,6 @@ jobs:
       # Step 1: Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # Step 2: Install clang-format (for linting)
-      - name: Install clang-format
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format-18
 
       # Step 4: Configure CMake
       - name: Configure CMake
