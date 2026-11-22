@@ -1,5 +1,6 @@
 - Use `.hpp` for header files, use `.cpp` for cpp files
 - Put header files inside `/include/`; put cpp files inside `/src/` under proper directories
+- See `CODING_STYLE.md` and `.clang-format` for style details
 
 - I don't even know what to call this project to be honest, it is this sort of thing that auto-calculate and summarize your performance in university
 - Some ideas on expansion, but right now the flow
@@ -26,11 +27,23 @@
         3. Add new courses
         4. Add new components
         5. Create record
+        6. Browse data
     
-    5. Edit user data - allow the user to edit these data: display name, degree mame
-    6. Add new semester record - add a record of new semester (a new file in `/data`), see init step 3. When this procedure ends, there should be 3 options. Option 1 - continue to "Add new semeester record"; Option 2 - continue to "Add new courses"; Option 3 - quit to menu, expected input for this last question - [1,3]
+    5. Edit user data - allow the user to edit these data: 
+        1. display name, 
+        2. degree mame
+    6. Add new semester record - add a record of new semester (a new file in `/data`), see init step 3. 
+        - When this procedure ends, there should be 3 options. 
+            1. continue to "Add new semeester record"; 
+            2. continue to "Add new courses"; 
+            3. quit to menu
+        - expected input for this last question - [1,3]
     7. Add new courses - add a new course given the semester (only if there is more than one semester record; inherit from "Add new semester record" if re-directed from there), see init step 4. When this procedure ends, there should be 3 options. Option 1 - continue to "Add new courses"; Option 2 - continue to "Add new components"; Option 3 - quit to menu, expected input for the last question - [1,3]
     8. Add new components - add a new component to a course given the course code or course name, for now, a semester should also be provided for searching. Flow: select option -> enter semester -> select code or name -> enter code or name. See init step 7 and 8. When this procedure ends, there should be 2 options. Option 1 - "Add new components"; option 2 - quit to menu
     9. Create record - ask user to input the semester, validate that the file in `/data` that matches the semester and generate a Markdown file with the format "Year <number> Semester <letter> Report" with... some formatting that shows their semester record and calculation
+    10. Browse data - list the user the available options via this hierachy, skipping any non-existing layers (only one exists) - degree > year > semester > course > components, list everything one layer below (e.g., year: list all semesters as options; semester - list all courses as options), plus a "go back" option, a "add record" option and a "quit to menu" option
 
-    
+- /data
+    - user.json - store user data
+    - folder structure - <degree_name>/"Year <year>"/"Semester <letter>"/"<course_code> <course_name>"/<component_name>.json / <component_group_name> / <subcomponents_name>.json
+    Follow... basic JSOn syntax for now, I don't know. I can fix up the structure after a test run.
