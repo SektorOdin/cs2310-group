@@ -1,15 +1,15 @@
 #pragma once
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
 
 struct Component {
     std::string name;
-    std::string type;            // "single" | "total"
-    double      weight;          // already-resolved number
-    int         partitions = 1;  // ignored if single
-    bool        isEqual  = true; // partitions weighted equally (true = the only mode for now)
-    std::vector<double> marks;   // 1 element if single; -1 = not entered
+    std::string type;          // "single" | "total"
+    double weight;             // already-resolved number
+    int partitions = 1;        // ignored if single
+    bool isEqual = true;       // partitions weighted equally (true = the only mode for now)
+    std::vector<double> marks; // 1 element if single; -1 = not entered
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Component, name, type, weight, partitions, marks)
 
@@ -29,5 +29,5 @@ struct SemesterFile {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SemesterFile, display_name, degree, semester, courses)
 
 // store.cpp implements these
-SemesterFile load_semester(const std::string& path);
-void save_semester(const std::string& path, const SemesterFile& data);
+SemesterFile load_semester(const std::string &path);
+void save_semester(const std::string &path, const SemesterFile &data);
