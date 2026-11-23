@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-
 namespace fs = std::filesystem;
 
 // --- prompt helpers ---
@@ -160,8 +159,8 @@ void show_report(const SemesterFile &f) {
             if (comp.type == "total") {
                 char letter = 'a';
                 for (double m : comp.marks) {
-                    std::cout << std::format("     ({}{}) {:<20} {:>7.2f} / {:>3d}\n", i,
-                                             letter++, "", (m >= 0.0) ? m : 0.0, 100);
+                    std::cout << std::format("     ({}{}) {:<20} {:>7.2f} / {:>3d}\n", i, letter++,
+                                             "", (m >= 0.0) ? m : 0.0, 100);
                     letter++;
                 }
             }
