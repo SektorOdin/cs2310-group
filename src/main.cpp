@@ -154,13 +154,13 @@ void show_report(const SemesterFile &f) {
         for (const Component &comp : c.components) {
             double st = component_subtotal(comp);
             double sub = (st >= 0.0) ? st * comp.weight / 100.0 : 0.0;
-            std::cout << std::format("  ({}) {} | {:>4.0f}% | {:>7.2f} / {:>3.0f} | {:>7.2f}%\n", i,
+            std::cout << std::format("  ({}) {} | {:>4.0f}% | {:>7.2f} / {:>3d} | {:>7.2f}%\n", i,
                                      pad(comp.name, 20), comp.weight, (st >= 0.0) ? st : 0.0, 100,
                                      sub);
             if (comp.type == "total") {
                 char letter = 'a';
                 for (double m : comp.marks) {
-                    std::cout << std::format("     ({}{}) {:<20} {:>7.2f} / {:>3.0f}\n", i,
+                    std::cout << std::format("     ({}{}) {:<20} {:>7.2f} / {:>3d}\n", i,
                                              letter++, "", (m >= 0.0) ? m : 0.0, 100);
                     letter++;
                 }
