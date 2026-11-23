@@ -15,3 +15,5 @@ void save_semester(const std::string& path, const SemesterFile& data) {
     if (!f) throw std::runtime_error("cannot write " + path);
     f << nlohmann::json(data).dump(2);
 }
+
+int main() { return 0; }

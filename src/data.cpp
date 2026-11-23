@@ -27,3 +27,5 @@ struct SemesterFile {
     std::vector<Course> courses;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SemesterFile, display_name, degree, semester, courses)
+
+int main() { return 0; }
