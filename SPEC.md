@@ -1,49 +1,141 @@
-- Use `.hpp` for header files, use `.cpp` for cpp files
-- Put header files inside `/include/`; put cpp files inside `/src/` under proper directories
-- See `CODING_STYLE.md` and `.clang-format` for style details
+# Grade Tool — SPEC
 
-- I don't even know what to call this project to be honest, it is this sort of thing that auto-calculate and summarize your performance in university
-- Some ideas on expansion, but right now the flow
-    1. User double click the `.exe`
-    2. The program generates a `/data` folder and a `/summary` folder if they are missing
-    3. The program executes the init procedure if it cannot find any correctly formatted `.json` files inside `/data`
-        
-        The init procedure
-        1. Ask the user their display name, it can be changed later and need no be their real name, used in summary generation, e.g., "Lorem"
-        2. Ask the user their degree name, the full degree name in `std::string` (e.g., "BSc Computer Science")
-        3. Ask the user their currect semester, the format is a number followed by either a 'A', a 'B' or a 'S' which indicates summer semester - the number should be [1, 4] (for now, unless there is exception), e.g., "2A"
-        4. Ask whether the user want to add at least one course to the semester record, reply with 'Y' / 'y' for yes and 'N' /'n' for no - a semester with no course is blocked from summary generation, and user must add at least 1 course later to access the summary feature
-        5. no -> setup complete; yes -> ask the user to input course code, it should be two letters followed by four numbers (in most cases), e.g., "CS2312"
-        6. Ask the user to input the course name, this should be a `std::string`, e.g., "Computer Programming"
-        7. Ask the user to input at least one component, otherwise this course would be invalid; first ask them about the name of this component, e.g., "Midterms"
-        8. Then, ask the user the percentage of this component (in total), the user should input a number (0, 100) with decimal support (up to 2 digits?)
-        9. By default, components are of "single" type, meaning the percentage represents the entire component (e.g., midterms), ask the user if they want to change this to "a total", i.e. quizzes or assignments that has multiple parts, the user should input 'N' / 'n' if they do not want to chage this, and a number (0, 100; integer) for equal "partition"
-        10. setup complete
-    
-    4. If no init is needed, the program goes into the main menu with these options
-        
-        1. Edit user data
-        2. Add new semester record
-        3. Add new courses
-        4. Add new components
-        5. Create record
-        6. Browse data
-    
-    5. Edit user data - allow the user to edit these data: 
-        1. display name, 
-        2. degree mame
-    6. Add new semester record - add a record of new semester (a new file in `/data`), see init step 3. 
-        - When this procedure ends, there should be 3 options. 
-            1. continue to "Add new semeester record"; 
-            2. continue to "Add new courses"; 
-            3. quit to menu
-        - expected input for this last question - [1,3]
-    7. Add new courses - add a new course given the semester (only if there is more than one semester record; inherit from "Add new semester record" if re-directed from there), see init step 4. When this procedure ends, there should be 3 options. Option 1 - continue to "Add new courses"; Option 2 - continue to "Add new components"; Option 3 - quit to menu, expected input for the last question - [1,3]
-    8. Add new components - add a new component to a course given the course code or course name, for now, a semester should also be provided for searching. Flow: select option -> enter semester -> select code or name -> enter code or name. See init step 7 and 8. When this procedure ends, there should be 2 options. Option 1 - "Add new components"; option 2 - quit to menu
-    9. Create record - ask user to input the semester, validate that the file in `/data` that matches the semester and generate a Markdown file with the format "Year <number> Semester <letter> Report" with... some formatting that shows their semester record and calculation
-    10. Browse data - list the user the available options via this hierachy, skipping any non-existing layers (only one exists) - degree > year > semester > course > components, list everything one layer below (e.g., year: list all semesters as options; semester - list all courses as options), plus a "go back" option, a "add record" option and a "quit to menu" option
+## Project
+Auto-calculate and summarize university performance. CLI. C++23, no external
+deps besides `libs/nlohmann/json.hpp`.
 
-- /data
-    - user.json - store user data
-    - folder structure - <degree_name>/"Year <year>"/"Semester <letter>"/"<course_code> <course_name>"/<component_name>.json / <component_group_name> / <subcomponents_name>.json
-    Follow... basic JSOn syntax for now, I don't know. I can fix up the structure after a test run.
+## File layout
+- `.hpp` in `/include/`, `.cpp` in `/src/`
+- See `CODING_STYLE.md` and `.clang-format` for style
+
+## Data
+One JSON file per semester, in `/data/<semester>.json`
+(e.g. `/data/2A.json`). If `/data/` or the file is missing, init runs.
+
+### Data model
+```json
+{
+  "display_name": "leidenfreude",
+  "degree": "BSc Computer Science",
+  "semester": "2A",
+  "courses": [
+    {
+      "code": "CS2310",
+      "name": "Computer Programming",
+      "components": [
+        {
+          "name": "Midterm",
+          "type": "single",
+          "weight": 20,
+          "partitions": 1,
+          "marks": [89.50]
+        },
+        {
+          "name": "E-Quiz",
+          "type": "total",
+          "weight": 20,
+          "partitions": 10,
+          "marks": [98.04, 93.33, 83.33, 93.83, 93.10, 97.44, 95.75, 95.49, 89.92, -1]
+        },
+        {
+          "name": "Final",
+          "type": "single",
+          "weight": 55,
+          "partitions": 1,
+          "marks": [-1]
+        }
+      ]
+    }
+  ]
+}
+```
+`type`: "single" (one mark) or "total" (multiple partitions)
+`partitions`: number of sub-parts; always 1 for single
+`weight`: percentage (0–100). At init, user can type `"remainder"` which
+resolves to `100 - (sum of fixed weights)` and is stored as a number
+`marks`: array. `-1` = not entered yet. For single, exactly 1 element.
+For total, `partitions` elements
+No stored subtotals — all computed at display time
+
+### Calculation
+- Component sub-total = mean of `marks` entries that are `>= 0`\
+ (i.e. ignore `-1` entries). If all are `-1`, sub-total is undefined.
+- Course total = sum over components: `(sub-total / 100) * weight`\
+ (only for components that have at least one entered mark)
+- Semester total = mean of course totals
+
+### Startup
+1. Create `/data/` if missing
+2. If no `.json` files in `/data/` → run init
+3. If `.json` files exist but any fail to parse → delete the bad file, re-init
+4. Enter main menu
+
+### Init procedure
+1. Ask display name (string, can be anything, e.g. "Lorem")
+2. Ask degree name (string, e.g. "BSc Computer Science")
+3. Ask semester (format: number [1,4] + letter A/B/S, e.g. "2A")
+4. Ask "add a course now?" (Y/N)
+    - N → save, done
+    - Y → loop:
+        1. Ask course code (e.g. "CS2310")
+        2. Ask course name (e.g. "Computer Programming")
+        3. Loop components:
+            1. Ask component name (e.g. "Midterm")
+            2. Ask weight: number (0, 100) or `"remainder"`.\
+            Remaining weight decreases as components are added.\
+                Invalid if > remaining or <= 0.
+            3. Ask type: `"single"` or `"total"`.\
+                    single → marks = [-1]\
+                    total → ask partition count N, marks = [-1, -1, ..., -1] (N entries)\
+            4. Ask "add another component?" (Y/N). Stop when weights hit 100 or N.\
+        4. Ask "add another course?" (Y/N)
+5. Save to `/data/<semester>.json`
+
+### Main menu
+```
+1. Edit user data        [TODO]
+2. Add new semester record
+3. Add new courses       [TODO]
+4. Add new components    [TODO]
+5. Show report
+6. Record a mark
+0. Quit
+```
+### 2. Add new semester record
+Same as init (new file in `/data/`).
+
+### 5. Show report
+
+Prints a receipt to terminal. One block per semester file in `/data/`:
+```
+NAME: <display_name>
+DEGREE: <degree>
+SEMESTER: <semester>
+
+COURSE: <course_name> (<code>)
+  (1) <component_name>......... | <weight>% | <sub_total> / 100 | <subtotal>
+  (2) <component_name>......... | <weight>% | <sub_total> / 100 | <subtotal>
+     (a) <partition 1>         | <mark> / 100
+     (b) <partition 2>         | <mark> / 100
+  ...
+  course total: <X.XX>%
+```
+- Unentered marks show as `?` in the partition sub-rows
+- Total components expand to show each partition
+- Single components do not expand
+
+### 6. Record a mark
+1. List available semesters, ask which (auto-select if only one)
+2. Ask course code
+3. List components in that course, ask which
+4. For each partition (or the single mark), prompt:\
+    "mark (empty = keep current): "
+5. Save to JSON, print "updated"
+
+### Stretch / future (not required for deadline)
+- Markdown export of the report
+- Degree-level report (aggregate over all /data/ files)
+- Browse data (hierarchical: degree > year > semester > course > component)
+- Edit user data / Add courses / Add components (menu items 1, 3, 4)
+- Chaining flow (after adding a semester, offer to add courses, etc.)
+- Unequal partition weights (currently isEqual is always true)
