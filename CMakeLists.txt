@@ -4,4 +4,9 @@ project(cs2310-group LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(your_target PRIVATE libs)
+add_executable(grade
+    src/main.cpp
+    src/store.cpp
+)
+
+target_include_directories(grade PRIVATE include libs)
