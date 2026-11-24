@@ -271,6 +271,112 @@ void show_report(const SemesterFile &f) {
     std::cout << std::format("SEMESTER TOTAL: {:.2f}%\n", semester_total(f));
 }
 
+// --- 1. Edit user data ---
+void edit_user_data() {
+    std::vector<std::string> sems;
+    for (auto &e : fs::directory_iterator("data")) {
+        if (e.path().extension() == ".json") {
+            sems.push_back(e.path().stem().string());
+        }
+    }
+    if (sems.empty()) {
+        std::cout << "no semester data\n";
+        return;
+    }
+    std::string sel = (sems.size() == 1) ? sems[0] : prompt("which semester? (" + sems[0] + "): ");
+    SemesterFile f = load_semester("data/" + sel + ".json");
+
+    std::string s = prompt("display name (empty = keep " + f.display_name + "): ");
+    if (!s.empty()) {
+        f.display_name = s;
+    }
+    s = prompt("degree (empty = keep " + f.degree + "): ");
+    if (!s.empty()) {
+        f.degree = s;
+    }
+    save_semester("data/" + sel + ".json", f);
+    std::cout << "updated\n";
+}
+
+// --- 3. Add new courses (reuses add_course from init) ---
+void add_course_new() {
+    std::vector<std::string> sems;
+    for (auto &e : fs::directory_iterator("data")) {
+        if (e.path().extension() == ".json") {
+            sems.push_back(e.path().stem().string());
+        }
+    }
+    if (sems.empty()) {
+        std::cout << "no semester data\n";
+        return;
+    }
+    std::string sel = (sems.size() == 1) ? sems[0] : prompt("which semester? (" + sems[0] + "): ");
+    SemesterFile f = load_semester("data/" + sel + ".json");
+    add_course(f);
+    save_semester("data/" + sel + ".json", f);
+    std::cout << "course added\n";
+}
+
+// --- 4. Add new components ---
+void add_component_new() {
+    std::vector<std::string> sems;
+    for (auto &e : fs::directory_iterator("data")) {
+        if (e.path().extension() == ".json") {
+            sems.push_back(e.path().stem().string());
+        }
+    }
+    if (sems.empty()) {
+        std::cout << "no semester data\n";
+        return;
+    }
+    std::string sel = (sems.size() == 1) ? sems[0] : prompt("which semester? (" + sems[0] + "): ");
+    SemesterFile f = load_semester("data/" + sel + ".json");
+
+    std::string code = prompt("course code: ");
+    for (auto &c : f.courses) {
+        if (c.code != code) {
+            continue;
+        }
+        double used = 0.0;
+        for (const Component &comp : c.components) {
+            used += comp.weight;
+        }
+        double left = 100.0 - used;
+        if (left <= 0.0) {
+            std::cout << "weights already at 100%\n";
+            return;
+        }
+
+        Component comp;
+        comp.name = prompt("component name: ");
+        std::string w = prompt("weight (0-" + std::to_string((int)left) + " or 'remainder'): ");
+        if (w == "remainder") {
+            comp.weight = left;
+        } else {
+            comp.weight = std::stod(w);
+        }
+        if (comp.weight <= 0.0 || comp.weight > left) {
+            std::cout << "invalid weight\n";
+            return;
+        }
+
+        std::string t = prompt("single or total? (s/t): ");
+        if (t == "t" || t == "T") {
+            comp.type = "total";
+            comp.partitions = prompt_int("partitions: ");
+            comp.marks.assign(comp.partitions, -1.0);
+        } else {
+            comp.type = "single";
+            comp.marks = {-1.0};
+        }
+        c.components.push_back(comp);
+        save_semester("data/" + sel + ".json", f);
+        std::cout << "component added\n";
+        return;
+    }
+    std::cout << "course not found\n";
+}
+
 int main() {
     if (!fs::exists("data")) {
         fs::create_directories("data");
@@ -298,10 +404,10 @@ int main() {
             init_new_semester();
             break;
         case 3:
-            add_new_courses();
+            add_course_new();
             break;
         case 4:
-            add_new_components();
+            add_component_new();
             break;
         case 5: {
             for (auto &e : fs::directory_iterator("data")) {
