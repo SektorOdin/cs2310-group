@@ -5,19 +5,17 @@ on:
     branches: [ "main" ]
   push:
     branches: [ "main" ]
-    tags: [ "v*" ]
+    tags: [ "*" ]
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install clang-format
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-format-18
-
       - name: Check code formatting
         run: |
           clang-format-18 --dry-run --Werror \
@@ -27,13 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
       - name: Build
         run: cmake --build build
-
       - name: Upload dev build
         if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
@@ -41,20 +36,38 @@ jobs:
           name: grade-dev
           path: build/grade
 
+  # Rolling: every green push to main updates the "latest" pre-release
+  prerelease:
+    if: github.ref_type != 'tag' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build
+      - name: Update "latest" pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: latest
+          prerelease: true
+          files: build/grade
+
+  # Full release: only when you push a tag (e.g. 0.1.0)
   release:
     if: github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
       - name: Build
         run: cmake --build build
-        
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: build/grade
