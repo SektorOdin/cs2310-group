@@ -77,6 +77,44 @@ void add_course(SemesterFile &f) {
     f.courses.push_back(c);
 }
 
+
+void edit_user_data() {
+    std::string sel = pick_semester();
+    if (sel.empty()) {
+        return;
+    }
+    std::string path = "data/" + sel + ".json";
+    SemesterFile f = load_semester(path);
+
+    std::cout << "current:\n"
+              << "  1. display name: " << f.display_name << "\n"
+              << "  2. degree:       " << f.degree << "\n"
+              << "  3. semester:     " << f.semester << "\n";
+    int field = prompt_int("edit which field? (1-3, 0=cancel): ");
+    if (field < 1 || field > 3) {
+        return;
+    }
+
+    if (field == 1) {
+        f.display_name = prompt("new display name: ");
+    } else if (field == 2) {
+        f.degree = prompt("new degree: ");
+    } else {
+        std::string old_sem = f.semester;
+        f.semester = prompt("new semester (e.g. 2A): ");
+        if (f.semester != old_sem) {
+            // rename the file so path stays consistent with stem
+            std::string new_path = "data/" + f.semester + ".json";
+            save_semester(new_path, f);
+            fs::remove(path);
+            std::cout << "updated (renamed " << path << " -> " << new_path << ")\n";
+            return;
+        }
+    }
+    save_semester(path, f);
+    std::cout << "updated\n";
+}
+
 void init_new_semester() {
     SemesterFile f;
     f.display_name = prompt("display name: ");
@@ -88,6 +126,69 @@ void init_new_semester() {
     std::string path = "data/" + f.semester + ".json";
     save_semester(path, f);
     std::cout << "saved " << path << "\n";
+}
+
+// Add courses to an existing semester 
+void add_new_courses() {
+    std::string sel = pick_semester();
+    if (sel.empty()) {
+        return;
+    }
+    std::string path = "data/" + sel + ".json";
+    SemesterFile f = load_semester(path);
+
+    do {
+        add_course(f);
+    } while (prompt_yes("add another course? "));
+
+    save_semester(path, f);
+    std::cout << "saved " << path << "\n";
+}
+
+// Add components to an existing course in a semester
+void add_new_components() {
+    std::string sel = pick_semester();
+    if (sel.empty()) {
+        return;
+    }
+    std::string path = "data/" + sel + ".json";
+    SemesterFile f = load_semester(path);
+
+    if (f.courses.empty()) {
+        std::cout << "no courses in this semester\n";
+        return;
+    }
+
+    std::cout << "courses:\n";
+    for (size_t i = 0; i < f.courses.size(); i++) {
+        std::cout << "  " << (i + 1) << ". " << f.courses[i].code << " - " << f.courses[i].name
+                  << "\n";
+    }
+    std::string key = prompt("course code or #: ");
+    Course *target = nullptr;
+    try {
+        int idx = std::stoi(key);
+        if (idx >= 1 && idx <= (int)f.courses.size()) {
+            target = &f.courses[idx - 1];
+        }
+    } catch (...) {
+    }
+    if (!target) {
+        for (auto &c : f.courses) {
+            if (c.code == key || c.name == key) {
+                target = &c;
+                break;
+            }
+        }
+    }
+    if (!target) {
+        std::cout << "course not found\n";
+        return;
+    }
+
+    add_components_to_course(*target);
+    save_semester(path, f);
+    std::cout << "updated\n";
 }
 
 // --- record a mark (SPEC: new item 6) ---
@@ -192,16 +293,16 @@ int main() {
         int c = prompt_int("> ");
         switch (c) {
         case 1:
-            std::cout << "TODO\n";
+            edit_user_data();
             break;
         case 2:
             init_new_semester();
             break;
         case 3:
-            std::cout << "TODO\n";
+            add_new_courses();
             break;
         case 4:
-            std::cout << "TODO\n";
+            add_new_components();
             break;
         case 5: {
             for (auto &e : fs::directory_iterator("data")) {
