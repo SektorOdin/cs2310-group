@@ -17,20 +17,61 @@ std::string prompt(const std::string &q) {
     return s;
 }
 
-bool prompt_yes(const std::string &q) {
-    std::string s = prompt(q);
-    return s == "Y" || s == "y";
+// strict Y/N; def = fallback after 5 bad tries
+bool prompt_bool(const std::string &q, bool def = false) {
+    for (int i = 0; i < 5; i++) {
+        std::string s = prompt(q);
+        if (s == "Y" || s == "y") return true;
+        if (s == "N" || s == "n") return false;
+        std::cout << "(Y/n) ";
+    }
+    std::cout << "Too many error tries, using default " << (def ? "Y" : "N") << "\n";
+    return def;
 }
 
-int prompt_int(const std::string &q) {
-    while (true) {
+// bounded int; def = fallback after 5 bad tries (also used when no range)
+int prompt_int(const std::string &q, int def = -1, int lo = -2147483647, int hi = 2147483647) {
+    for (int i = 0; i < 5; i++) {
         std::string s = prompt(q);
         try {
-            return std::stoi(s);
+            int v = std::stoi(s);
+            if (v >= lo && v <= hi) {
+                return v;
+            }
+            std::cout << "Out of range (" << lo << "-" << hi << ")\n";
         } catch (...) {
-            std::cout << "enter a number\n";
+            std::cout << "Enter a number\n";
         }
     }
+    std::cout << "Too many error tries, using default " << def << "\n";
+    return def;
+}
+
+// pick from a list of options, 1-indexed; def = fallback after 5 bad tries
+int prompt_choice(const std::string &q, const std::vector<std::string> &opts, int def = -1) {
+    for (int i = 0; i < 5; i++) {
+        for (size_t k = 0; k < opts.size(); k++) {
+            std::cout << "  " << (k + 1) << ". " << opts[k] << "\n";
+        }
+        int v = prompt_int(q, def, 1, (int)opts.size());
+        if (v >= 1 && v <= (int)opts.size()) return v;
+    }
+    return def;
+}
+
+// semester: number 1-4 + A/B/S
+std::string prompt_semester() {
+    for (int i = 0; i < 5; i++) {
+        std::string s = prompt("semester (e.g. 2A): ");
+        if (s.size() == 2 && std::isdigit((unsigned char)s[0]) && s[0] >= '1' && s[0] <= '4'
+            && (s[1] == 'A' || s[1] == 'B' || s[1] == 'S' || s[1] == 'a' || s[1] == 'b' || s[1] == 's')) {
+            if (s[1] >= 'a') s[1] -= 32; // normalize to uppercase
+            return s;
+        }
+        std::cout << "Format: number 1-4, then A, B, or S [Summer]\n";
+    }
+    std::cout << "defaulting to 1A\n";
+    return "1A";
 }
 
 // --- init flow (SPEC: steps 3-10) ---
