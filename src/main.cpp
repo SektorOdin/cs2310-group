@@ -77,7 +77,6 @@ void add_course(SemesterFile &f) {
     f.courses.push_back(c);
 }
 
-
 void edit_user_data() {
     std::string sel = pick_semester();
     if (sel.empty()) {
@@ -128,7 +127,7 @@ void init_new_semester() {
     std::cout << "saved " << path << "\n";
 }
 
-// Add courses to an existing semester 
+// Add courses to an existing semester
 void add_new_courses() {
     std::string sel = pick_semester();
     if (sel.empty()) {
