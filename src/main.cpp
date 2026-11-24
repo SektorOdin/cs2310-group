@@ -111,7 +111,7 @@ void add_course(SemesterFile &f) {
         if (left <= 0.0) {
             break;
         }
-        if (!prompt_yes("add another component? ")) {
+        if (!prompt_bool("add another component? ")) {
             break;
         }
     }
@@ -184,7 +184,7 @@ void init_new_semester() {
     f.display_name = prompt("display name: ");
     f.degree = prompt("degree: ");
     f.semester = prompt("semester (e.g. 2A): ");
-    if (prompt_yes("add a course now? ")) {
+    if (prompt_bool("add a course now? ")) {
         add_course(f);
     }
     std::string path = "data/" + f.semester + ".json";
@@ -203,7 +203,7 @@ void add_new_courses() {
 
     do {
         add_course(f);
-    } while (prompt_yes("add another course? "));
+    } while (prompt_bool("add another course? "));
 
     save_semester(path, f);
     std::cout << "saved " << path << "\n";
@@ -248,7 +248,7 @@ void add_components_to_course(Course &c) {
         if (left <= 0.0) {
             break;
         }
-        if (!prompt_yes("add another component? ")) {
+        if (!prompt_bool("add another component? ")) {
             break;
         }
     }
