@@ -168,9 +168,9 @@ void add_new_courses() {
     std::cout << "saved " << path << "\n";
 }
 
-void add_components_to_course(Course& c) {
+void add_components_to_course(Course &c) {
     double used = 0.0;
-    for (const Component& comp : c.components) {
+    for (const Component &comp : c.components) {
         used += comp.weight;
     }
     double left = 100.0 - used;
@@ -199,7 +199,7 @@ void add_components_to_course(Course& c) {
             comp.marks.assign(comp.partitions, -1.0);
         } else {
             comp.type = "single";
-            comp.marks = { -1.0 };
+            comp.marks = {-1.0};
         }
         c.components.push_back(comp);
         left -= comp.weight;
