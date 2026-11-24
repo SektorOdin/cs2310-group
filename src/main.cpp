@@ -291,7 +291,7 @@ void record_mark() {
         for (size_t k = 0; k < comp.marks.size(); k++) {
             std::string q = std::format(
                 "mark {} ({}): ", k + 1,
-                (comp.marks[k] >= 0 ? std::format("{:.2f}", comp.marks[k]) : std::string("?")))
+                (comp.marks[k] >= 0 ? std::format("{:.2f}", comp.marks[k]) : std::string("?")));
                 std::string s = prompt(q);
             if (!s.empty()) {
                 comp.marks[k] = std::stod(s);
