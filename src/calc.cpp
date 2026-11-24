@@ -25,19 +25,3 @@ inline double course_total(const Course &c) {
     }
     return total;
 }
-
-inline double semester_total(const SemesterFile &f) {
-    if (f.courses.empty()) {
-        return -1.0;
-    }
-    double sum = 0.0;
-    int n = 0;
-    for (const Course &c : f.courses) {
-        double t = course_total(c);
-        if (t >= 0.0) {
-            sum += t;
-            n++;
-        }
-    }
-    return n > 0 ? sum / n : -1.0;
-}

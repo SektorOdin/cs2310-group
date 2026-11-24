@@ -289,10 +289,10 @@ void record_mark() {
         }
         Component &comp = c.components[pick - 1];
         for (size_t k = 0; k < comp.marks.size(); k++) {
-            std::string q = comp.marks.size() > 1
-                                ? std::format("mark {} (empty = keep {}): ", k + 1, comp.marks[k])
-                                : "mark (empty = keep): ";
-            std::string s = prompt(q);
+            std::string q = std::format(
+                "mark {} ({}): ", k + 1,
+                (comp.marks[k] >= 0 ? std::format("{:.2f}", comp.marks[k]) : std::string("?")))
+                std::string s = prompt(q);
             if (!s.empty()) {
                 comp.marks[k] = std::stod(s);
             }
@@ -330,14 +330,12 @@ void show_report(const SemesterFile &f) {
                 for (double m : comp.marks) {
                     std::cout << std::format("     ({}{}) {:<20} {:>7.2f} / {:>3d}\n", i, letter++,
                                              "", (m >= 0.0) ? m : 0.0, 100);
-                    letter++;
                 }
             }
             i++;
         }
         std::cout << std::format("  course total: {:.2f}%\n\n", course_total(c));
     }
-    std::cout << std::format("SEMESTER TOTAL: {:.2f}%\n", semester_total(f));
 }
 
 int main() {
