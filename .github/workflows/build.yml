@@ -61,7 +61,9 @@ jobs:
         run: cmake --build build
       - name: Package (Windows)
         if: runner.os == 'Windows'
-        run: Compress-Archive -Path build/grade.exe -DestinationPath "${{ matrix.artifact-name }}"
+        run: |
+          Get-ChildItem -Recurse -Filter grade.exe |
+            Compress-Archive -DestinationPath "${{ matrix.artifact-name }}"
       - name: Package (unix)
         if: runner.os != 'Windows'
         run: zip "${{ matrix.artifact-name }}" build/grade
@@ -92,7 +94,9 @@ jobs:
         run: cmake --build build
       - name: Package (Windows)
         if: runner.os == 'Windows'
-        run: Compress-Archive -Path build/grade.exe -DestinationPath "${{ matrix.artifact-name }}"
+        run: |
+          Get-ChildItem -Recurse -Filter grade.exe |
+            Compress-Archive -DestinationPath "${{ matrix.artifact-name }}"
       - name: Package (unix)
         if: runner.os != 'Windows'
         run: zip "${{ matrix.artifact-name }}" build/grade
