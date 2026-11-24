@@ -367,10 +367,10 @@ int main() {
             init_new_semester();
             break;
         case 3:
-            add_new_course();
+            add_new_courses();
             break;
         case 4:
-            add_new_component();
+            add_new_components();
             break;
         case 5: {
             for (auto &e : fs::directory_iterator("data")) {
