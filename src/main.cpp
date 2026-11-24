@@ -292,7 +292,7 @@ void record_mark() {
             std::string q = std::format(
                 "mark {} ({}): ", k + 1,
                 (comp.marks[k] >= 0 ? std::format("{:.2f}", comp.marks[k]) : std::string("?")));
-                std::string s = prompt(q);
+            std::string s = prompt(q);
             if (!s.empty()) {
                 comp.marks[k] = std::stod(s);
             }
