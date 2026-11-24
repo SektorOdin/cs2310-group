@@ -39,7 +39,38 @@ jobs:
           name: grade-dev
           path: build/grade
 
-  # Rolling: every green push to main updates the "latest" pre-release
+  build-release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            artifact-name: grade-windows-x64.zip
+          - os: macos-latest
+            artifact-name: grade-macos-arm64.zip
+          - os: ubuntu-latest
+            artifact-name: grade-linux-x64.zip
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path build/grade.exe -DestinationPath "${{ matrix.artifact-name }}"
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        run: zip "${{ matrix.artifact-name }}" build/grade
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-name }}
+
+            # Rolling: every green push to main updates the "latest" pre-release
   prerelease:
     if: github.ref_type != 'tag' && github.event_name == 'push'
     needs: build
@@ -57,20 +88,18 @@ jobs:
           name: latest
           prerelease: true
           files: build/grade
-
-  # Full release: only when you push a tag (e.g. 0.1.0)
+          
   release:
     if: github.ref_type == 'tag'
-    needs: build
+    needs: [build, build-release]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-      - name: Build
-        run: cmake --build build
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: build/grade
+          files: artifacts/*
