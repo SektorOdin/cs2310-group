@@ -77,6 +77,30 @@ void add_course(SemesterFile &f) {
     f.courses.push_back(c);
 }
 
+std::string pick_semester() {
+    std::vector<std::string> sems;
+    for (auto &e : fs::directory_iterator("data")) {
+        if (e.path().extension() == ".json") {
+            sems.push_back(e.path().stem().string());
+        }
+    }
+    if (sems.empty()) {
+        std::cout << "no semester data\n";
+        return "";
+    }
+    if (sems.size() == 1) {
+        return sems[0];
+    }
+    for (size_t i = 0; i < sems.size(); i++) {
+        std::cout << (i + 1) << ". " << sems[i] << "\n";
+    }
+    int pick = prompt_int("pick: ");
+    if (pick < 1 || pick > (int)sems.size()) {
+        return "";
+    }
+    return sems[pick - 1];
+}
+
 void edit_user_data() {
     std::string sel = pick_semester();
     if (sel.empty()) {
